@@ -9,6 +9,12 @@ output*/
 outputs/
 DREAM/
 data/
+data/
+output*/
+
+*.pt
+*.pth
+
 
 # Distribution / packaging
 .Python

@@ -1,0 +1,68 @@
+{
+    "image_path": "/home/najo/NAS/DIP/DINObotPose/DREAM/data/real/panda-3cam_azure/000000.rgb.jpg",
+    "image_size": [
+        640,
+        480
+    ],
+    "keypoints": [
+        {
+            "name": "panda_link0",
+            "x": 243.75,
+            "y": 395.625
+        },
+        {
+            "name": "panda_link2",
+            "x": 240.0,
+            "y": 272.8125
+        },
+        {
+            "name": "panda_link3",
+            "x": 165.0,
+            "y": 194.0625
+        },
+        {
+            "name": "panda_link4",
+            "x": 171.25,
+            "y": 168.75
+        },
+        {
+            "name": "panda_link6",
+            "x": 293.75,
+            "y": 181.875
+        },
+        {
+            "name": "panda_link7",
+            "x": 330.0,
+            "y": 177.1875
+        },
+        {
+            "name": "panda_hand",
+            "x": 335.0,
+            "y": 229.6875
+        }
+    ],
+    "joint_angles_rad": [
+        -2.980918666745623e-14,
+        -1.519467196378979e-13,
+        -1.5596866246442298e-13,
+        -7.723959924987867e-07,
+        -4.112832036745617e-12,
+        1.1694441422183122e-11,
+        5.880465927567136e-13,
+        3.8183529227353574e-08,
+        1.4088321620420174e-07
+    ],
+    "joint_angles_deg": [
+        -1.707940538130115e-12,
+        -8.705904920580654e-12,
+        -8.936345587129413e-12,
+        -4.4255026296013966e-05,
+        -2.356479178455828e-10,
+        6.700420773775306e-10,
+        3.369258691487964e-11,
+        2.1877549443161115e-06,
+        8.07201286079362e-06
+    ],
+    "model_path": "/home/najo/NAS/DIP/DINObotPose/TRAIN/outputs/dinov2_base_multi_robot_20260211_100644/best_model.pth",
+    "model_name": "facebook/dinov3-vitb16-pretrain-lvd1689m"
+}
