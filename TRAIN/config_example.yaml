@@ -1,0 +1,137 @@
+# DINOv3 Pose Estimation Training Configuration Example
+# DREAM 학습 방식을 참고한 설정 파일
+
+# ============================================================================
+# Data Configuration
+# ============================================================================
+data:
+  # 학습 데이터 경로 (NDDS 형식)
+  train_dir: "/path/to/your/train/data"
+
+  # 검증 데이터 경로 (없으면 train_dir를 split)
+  val_dir: null  # or "/path/to/your/val/data"
+
+  # Train/validation split (val_dir가 없을 때만 사용)
+  # DREAM은 0.8을 사용하지만, 여기서는 0.9/0.1 split 사용
+  train_split: 0.9
+
+  # 키포인트 이름 (Panda robot 예제)
+  keypoint_names:
+    - panda_link0
+    - panda_link2
+    - panda_link3
+    - panda_link4
+    - panda_link6
+    - panda_link7
+    - panda_hand
+
+  # 이미지 크기
+  image_size: 512
+  heatmap_size: 512
+
+  # 데이터 증강
+  augmentation: true
+
+  # Gaussian heatmap sigma
+  sigma: 5.0
+
+# ============================================================================
+# Model Configuration
+# ============================================================================
+model:
+  # DINOv3 모델 선택
+  # Options:
+  #   - facebook/dinov2-small (21M params)
+  #   - facebook/dinov2-base (86M params)
+  #   - facebook/dinov2-large (304M params)
+  #   - facebook/dinov2-giant (1.1B params)
+  name: "facebook/dinov2-base"
+
+  # 백본 freeze 여부 (True 권장)
+  freeze_backbone: true
+
+# ============================================================================
+# Training Configuration
+# ============================================================================
+training:
+  # Epochs
+  epochs: 100
+
+  # Batch size
+  batch_size: 8
+
+  # Data loading workers
+  num_workers: 4
+
+  # Optimizer
+  optimizer:
+    type: "adam"  # adam, adamw, sgd
+    learning_rate: 0.0001
+    weight_decay: 0.00001
+
+  # Learning rate scheduler
+  scheduler:
+    type: "step"  # step, cosine, plateau, none
+    step_size: 30  # for step scheduler
+    gamma: 0.1     # for step scheduler
+
+  # Loss weights
+  loss:
+    heatmap_weight: 1.0
+    angle_weight: 0.1
+    angle_loss_type: "mse"  # mse or l1
+
+  # Random seed
+  seed: 42
+
+  # Output directory
+  output_dir: "./outputs/dinov2_base_panda"
+
+  # Resume from checkpoint
+  resume: null  # or "/path/to/checkpoint.pth"
+
+# ============================================================================
+# Hardware Configuration
+# ============================================================================
+hardware:
+  # GPU device
+  device: "cuda"  # cuda or cpu
+
+  # Multi-GPU training
+  distributed: false
+  gpu_ids: [0]
+
+  # Mixed precision training
+  use_amp: false
+
+# ============================================================================
+# Logging Configuration
+# ============================================================================
+logging:
+  # Tensorboard
+  use_tensorboard: true
+
+  # Log interval (iterations)
+  log_interval: 10
+
+  # Validation interval (epochs)
+  val_interval: 1
+
+  # Save checkpoint interval (epochs)
+  save_interval: 5
+
+  # Keep last N checkpoints
+  keep_last_n: 3
+
+# ============================================================================
+# Evaluation Configuration
+# ============================================================================
+evaluation:
+  # Evaluation metrics
+  metrics:
+    - pck  # Percentage of Correct Keypoints
+    - mse  # Mean Squared Error
+    - mae  # Mean Absolute Error (for angles)
+
+  # PCK threshold (pixels)
+  pck_threshold: 5.0

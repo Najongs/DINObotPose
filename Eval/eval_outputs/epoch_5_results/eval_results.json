@@ -1,0 +1,31 @@
+{
+    "keypoint": {
+        "num_gt_outframe": 1901,
+        "num_missing_gt_outframe": 0,
+        "num_found_gt_outframe": 1901,
+        "num_gt_inframe": 40078,
+        "num_found_gt_inframe": 40078,
+        "num_missing_gt_inframe": 0,
+        "l2_error_mean_px": 8.755662571040068,
+        "l2_error_median_px": 3.1357685003581706,
+        "l2_error_std_px": 25.817060663239797,
+        "l2_error_auc": 0.7455076850142224,
+        "l2_error_auc_thresh_px": 20.0
+    },
+    "pnp_add": {
+        "num_pnp_found": 5997,
+        "num_pnp_not_found": -14,
+        "num_pnp_possible": 5983,
+        "num_min_inframe_projs_gt_for_pnp": 4,
+        "pnp_magic_number": -999.0,
+        "add_mean": 12.442667724763528,
+        "add_median": 2.383719761567055,
+        "add_std": 31.344423547909837,
+        "add_auc": 5.446264415844895e-05,
+        "add_auc_thresh": 0.1
+    },
+    "angle": {
+        "mae_rad": 1.0811961992374108e-08,
+        "mae_deg": 6.194797492753423e-07
+    }
+}
