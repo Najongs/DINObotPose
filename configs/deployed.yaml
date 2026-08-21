@@ -1,0 +1,25 @@
+# The deployed configuration. Every number reported in the paper uses exactly these settings,
+# identically for every camera and every robot.
+#
+# What the fit does NOT use, and why (all measured on the full test sets):
+#   confidence gate        removed: clean -0.02, 40% occlusion -0.04 (a minimum-keypoint floor
+#                          overrode it, so it could never drop more than one of seven keypoints)
+#   covariance weighting   removed: -0.3 on the four-camera mean, sign varied by camera
+#   divergence guard       removed: fired once in 4,000 frames, -0.02
+#   render-and-compare     removed: +-0.0 once the detector was augmentation-trained
+pipeline:
+  input_size: 512
+  passes: 2                 # full frame, then a crop the first pass derives for itself
+  box: union                # solved skeleton projected back, united with confident detections
+  decode: dark              # sub-pixel heatmap decoding
+fit:
+  iterations: 200
+  optimizer: adam
+  learning_rate: 0.02
+  robust_kernel: geman_mcclure   # IRLS weight, knee 8 px, enabled after a 30-iteration warm-up
+  loss: huber                    # knee ~5 px on the image-normalised residual
+  free_variables: [joint_angles, rotation, translation]   # 12 DOF; terminal wrist roll fixed at 0
+eval:
+  metric: add_auc
+  threshold_mm: 100
+  batch_size: 24

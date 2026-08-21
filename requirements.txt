@@ -1,0 +1,11 @@
+# DINObotPose — pinned to the environment the paper numbers were measured in.
+# torch/torchvision are CUDA 12.8 builds; the extra index is required.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.10.0
+torchvision==0.25.0
+numpy==1.26.4
+opencv-python-headless==4.13.0.92
+pillow==12.1.1
+tqdm==4.67.3
+transformers==5.2.0        # >=4.56 required: DINOv3ViTModel
+albumentations==2.0.8

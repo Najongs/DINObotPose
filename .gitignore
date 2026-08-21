@@ -1,0 +1,7 @@
+checkpoints/
+outputs/
+*.npz
+*.pth
+__pycache__/
+*.pyc
+.venv/
