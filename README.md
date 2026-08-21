@@ -38,9 +38,15 @@ CUDA 12.8 wheels are pinned for torch and torchvision. The backbone architecture
 ## Get the weights
 
 ```bash
-python scripts/download_weights.py       # 743 MB per robot, into checkpoints/
+python scripts/download_weights.py       # 741 MB for both robots, into checkpoints/
 python scripts/doctor.py                 # packages, GPU, checkpoints, dataset
 ```
+
+The DINOv3 trunk ships once rather than once per detector, with a small override for the
+detectors whose continue-training moved their last blocks, so the download is half the size of
+the assembled tree (741 MB against 1486 MB; 517 MB for Panda alone). `download_weights.py`
+reassembles the six checkpoints per robot; `python scripts/pack_weights.py verify` is the
+tensor-by-tensor proof that reassembly reproduces the originals exactly.
 
 `doctor.py` exits non-zero on the first blocking problem and lists your GPUs by UUID, which is the
 only unambiguous way to pin a card on a multi-GPU host.
@@ -83,9 +89,10 @@ finishes, so the run can be interrupted and resumed.
 
 ## Licensing and attribution
 
-- The detector checkpoints contain DINOv3 backbone weights (about 342 MB of each 359 MB file).
-  DINOv3 is released by Meta under its own license; using or redistributing these checkpoints is
-  subject to that license, and by downloading them you accept it.
+- The released weights contain the DINOv3 trunk (343 MB of the 741 MB download), unchanged in its
+  first two thirds and continue-trained in its last blocks. DINOv3 is released by Meta under its
+  own license; using or redistributing these weights is subject to that license, and by
+  downloading them you accept it.
 - The DREAM benchmark is distributed by NVIDIA under its own terms.
 
 ## Citation

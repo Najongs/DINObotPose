@@ -1,23 +1,30 @@
 #!/usr/bin/env python3
-"""Fetch the released checkpoints from the HuggingFace Hub into checkpoints/.
+"""Fetch the released weights from the HuggingFace Hub and assemble checkpoints/.
 
     python scripts/download_weights.py              # both robots
     python scripts/download_weights.py --robot panda
 
-The weights are not in git: the six files per robot total 743 MB, and the detector checkpoints
-carry the frozen DINOv3 backbone inside them (223 of 261 tensors), which is what lets this
-package run without any HuggingFace model access at inference time.
+The release ships the DINOv3 trunk once (343 MB) rather than once per detector, with a small
+override for the detectors whose continue-training moved their last blocks. Assembly rebuilds
+the six checkpoints per robot exactly as they were trained, so nothing about inference changes:
+
+    both robots   741 MB downloaded, 1486 MB on disk
+    panda only    517 MB
+    kuka only     573 MB
+
+`scripts/pack_weights.py verify` is the tensor-by-tensor proof that assembly round-trips.
 """
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PARTS = os.path.join(ROOT, "release_weights")
 REPO_ID = os.environ.get("DINOBOTPOSE_HF_REPO", "Najongs/dinobotpose")
-FILES = ["pass1_detector.pth", "pass1_angle.pth", "pass1_rotation.pth",
-         "pass2_detector.pth", "pass2_angle.pth", "pass2_rotation.pth"]
+MANIFEST = "manifest.json"
 
 
 def main() -> int:
@@ -25,6 +32,8 @@ def main() -> int:
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--robot", choices=["panda", "kuka", "both"], default="both")
     ap.add_argument("--repo-id", default=REPO_ID)
+    ap.add_argument("--parts-only", action="store_true",
+                    help="download without assembling (assemble later with pack_weights.py)")
     args = ap.parse_args()
 
     try:
@@ -32,21 +41,34 @@ def main() -> int:
     except ImportError:
         sys.exit("huggingface_hub is required: pip install huggingface_hub")
 
+    def get(name: str) -> str:
+        target = os.path.join(PARTS, name)
+        if os.path.isfile(target):
+            print(f"[skip] {name}")
+            return target
+        print(f"[get ] {name}", flush=True)
+        os.makedirs(os.path.dirname(target), exist_ok=True)
+        import shutil
+        # Copy out of the HF cache so the tree survives a cache clear.
+        shutil.copyfile(hf_hub_download(repo_id=args.repo_id, filename=name), target)
+        return target
+
+    manifest = json.load(open(get(MANIFEST)))
+    get(manifest["trunk"])
     robots = ["panda", "kuka"] if args.robot == "both" else [args.robot]
     for robot in robots:
-        dest = os.path.join(ROOT, "checkpoints", robot)
-        os.makedirs(dest, exist_ok=True)
-        for name in FILES:
-            target = os.path.join(dest, name)
-            if os.path.isfile(target):
-                print(f"[skip] {robot}/{name} already present")
-                continue
-            print(f"[get ] {robot}/{name}", flush=True)
-            path = hf_hub_download(repo_id=args.repo_id, filename=f"{robot}/{name}")
-            # Copy rather than symlink into the HF cache, so the tree stays self-contained
-            # if the cache is later cleared.
-            import shutil
-            shutil.copyfile(path, target)
+        for part in manifest["robots"][robot].values():
+            for key in ("head", "delta", "file"):
+                if key in part:
+                    get(f"{robot}/{part[key]}")
+
+    if args.parts_only:
+        print("\nparts downloaded — assemble with: python scripts/pack_weights.py assemble")
+        return 0
+
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    from pack_weights import assemble
+    assemble(robots)
     print("\ncheckpoints ready — verify with: python scripts/doctor.py")
     return 0
 

@@ -10,7 +10,9 @@
 # Runtime: roughly 6-9 hours on one RTX A6000. ORB alone is 32,315 frames.
 set -uo pipefail
 
-DATA="${1:?usage: reproduce_paper.sh <Converted_dataset root>}"
+DATA="${1:?usage: reproduce_paper.sh <Converted_dataset root> [kuka root]}"
+# KUKA ships as its own tree in the DREAM release; point at it if it is not under DATA.
+KUKA="${2:-$DATA}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY="${PYTHON:-python}"
 OUT="$ROOT/results"
@@ -42,8 +44,8 @@ run main panda synth_dr    "$SYN/panda_synth_test_dr"
 run main panda synth_photo "$SYN/panda_synth_test_photo"
 
 # Table 1, KUKA columns.
-run main kuka synth_dr    "$DATA/kuka_synth_test_dr"
-run main kuka synth_photo "$DATA/kuka_synth_test_photo"
+run main kuka synth_dr    "$KUKA/kuka_synth_test_dr"
+run main kuka synth_photo "$KUKA/kuka_synth_test_photo"
 
 # Occlusion table: the same 300 frames at five occlusion levels.
 for r in 0 0.1 0.2 0.3 0.4; do
