@@ -110,12 +110,6 @@ def main(args):
     elif args.fk_robot in ('baxter', 'baxter_left'):
         _FK = baxter_left_forward_kinematics
         print('==> using baxter-left FK for GT rotation labels')
-    elif args.fk_robot in ('meca500', 'fr5'):
-        import sys as _s, os as _o
-        _s.path.append(_o.path.join(_o.path.dirname(_o.path.abspath(__file__)), '../Eval'))
-        from robot_fk import meca500_forward_kinematics, fr5_forward_kinematics
-        _FK = meca500_forward_kinematics if args.fk_robot == 'meca500' else fr5_forward_kinematics
-        print(f'==> using {args.fk_robot} FK for GT rotation labels')
     ang_names = args.angle_joint_names.split(',') if getattr(args, 'angle_joint_names', None) else None
     kp_names = (args.keypoint_names.split(',') if args.keypoint_names
                 else ['link0', 'link2', 'link3', 'link4', 'link6', 'link7', 'hand'])
@@ -273,7 +267,7 @@ if __name__ == '__main__':
     p.add_argument('--keypoint-names', default=None,
                    help='comma-separated. Meca500: link0,link1,link2,link3,link4,link5,link6')
     p.add_argument('--fk-robot', default='panda',
-                   choices=['panda', 'meca500', 'fr5', 'kuka', 'iiwa7', 'baxter', 'baxter_left'],
+                   choices=['panda', 'kuka', 'iiwa7', 'baxter', 'baxter_left'],
                    help='FK used to build GT robot->camera rotation labels')
     p.add_argument('--angle-joint-names', default=None,
                    help='comma-separated sim_state joint names for GT angles (KUKA: iiwa7_joint_1..7). '

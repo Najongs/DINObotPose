@@ -281,7 +281,7 @@ if __name__ == '__main__':
     p.add_argument('--val-dir', required=True)
     p.add_argument('--keypoint-names', default=None,
                    help='comma-separated (substring-matched). Meca500: link0,link1,link2,link3,link4,link5,link6')
-    p.add_argument('--fk-robot', default='panda', choices=['panda', 'fr3', 'kuka', 'iiwa7', 'baxter', 'baxter_left'],
+    p.add_argument('--fk-robot', default='panda', choices=['panda', 'kuka', 'iiwa7', 'baxter', 'baxter_left'],
                    help='robot forward-kinematics for FK/reproj consistency loss')
     p.add_argument('--angle-joint-names', default=None,
                    help='comma-separated sim_state joint names for GT angles (order). '

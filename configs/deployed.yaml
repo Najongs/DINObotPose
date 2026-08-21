@@ -7,7 +7,12 @@
 #                          (300 photorealistic frames). A minimum-keypoint floor overrode it, so
 #                          it could never drop more than one of seven keypoints.
 #   covariance weighting   removed: -0.3 on the four-camera mean, full test sets, sign varied by camera
-#   divergence guard       removed: -0.02; fired once in 4,000 frames (1,000 per real split)
+#   divergence guard       removed. Full test sets: exactly 0.00 on Kinect360 and RealSense, to
+#                          every reported decimal, and +0.20 on Azure, where it rescues about
+#                          thirteen frames of 6,394 from the failure tail (mean ADD 23.8 against
+#                          25.1 mm, median unmoved). Kept out because a component that changes
+#                          one split by a fifth of a point and three others not at all is not
+#                          worth the reader's attention.
 #   render-and-compare     removed: +-0.0 once the detector was augmentation-trained
 pipeline:
   input_size: 512

@@ -9,3 +9,8 @@ pillow==12.1.1
 tqdm==4.67.3
 transformers==5.2.0        # >=4.56 required: DINOv3ViTModel
 albumentations==2.0.8
+huggingface_hub==1.5.0      # scripts/download_weights.py, scripts/upload_weights.py
+
+# Training only (scripts/train.py and train/*); inference does not import these.
+wandb==0.25.0                # runs offline by default: WANDB_MODE=offline
+pyyaml==6.0.3

@@ -12,7 +12,12 @@ dependencies = [
     "tqdm==4.67.3",
     "transformers==5.2.0",
     "albumentations==2.0.8",
+    "huggingface_hub==1.5.0",
 ]
+
+[project.optional-dependencies]
+# Only scripts/train.py and train/* need these; inference does not import them.
+train = ["wandb==0.25.0", "pyyaml==6.0.3"]
 
 [build-system]
 requires = ["hatchling"]

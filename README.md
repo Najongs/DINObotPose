@@ -23,7 +23,7 @@ Either path works; both pin the exact versions the paper was measured with.
 
 ```bash
 # uv
-uv sync
+uv sync                     # add --extra train to also install the training deps
 
 # conda
 conda env create -f environment.yml && conda activate dinobotpose
