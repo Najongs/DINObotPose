@@ -107,11 +107,18 @@ synthetic train split, so pass `prepare_dream.py` a download that includes it.
 
 ## Licensing and attribution
 
-- The released weights contain the DINOv3 trunk (343 MB of the 741 MB download), unchanged in its
-  first two thirds and continue-trained in its last blocks. DINOv3 is released by Meta under its
-  own license; using or redistributing these weights is subject to that license, and by
-  downloading them you accept it.
-- The DREAM benchmark is distributed by NVIDIA under its own terms.
+**Built with DINOv3.**
+
+The code in this repository is MIT (see `LICENSE`). The released **weights are not**: they contain
+the DINOv3 trunk (343 MB of the 741 MB download), unchanged in its first two thirds and
+continue-trained in its last blocks, which makes them a derivative of the DINOv3 Materials. They
+are therefore distributed under the [DINOv3 License](https://ai.meta.com/resources/models-and-libraries/dinov3-license/),
+a copy of which ships as `docs/DINOV3_LICENSE.md` and travels with the weights; downloading them
+is acceptance of it. Redistributing them onward is permitted under that same agreement, and
+carries its obligations with it, including the "Built with DINOv3" notice and its acceptable-use
+terms. Work published using them should acknowledge DINOv3 \[Siméoni et al., 2025\].
+
+The DREAM benchmark is distributed by NVIDIA under its own terms and is not redistributed here.
 
 ## Citation
 

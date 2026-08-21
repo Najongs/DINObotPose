@@ -1,3 +1,11 @@
+MIT License — code only.
+
+The released model weights are NOT covered by this license: they contain the DINOv3 trunk
+and are distributed under the DINOv3 License Agreement instead. See docs/DINOV3_LICENSE.md.
+Built with DINOv3.
+
+------------------------------------------------------------------------------
+
 MIT License
 
 Copyright (c) 2026 Najongs
