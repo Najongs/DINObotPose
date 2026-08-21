@@ -14,6 +14,13 @@ path to the RGB file. No pixels are copied, so the index costs a few hundred MB 
 Verify a converted split before a long job:
 
     python scripts/doctor.py --val-dir /path/to/Converted_dataset/DREAM_real/panda-3cam_realsense
+
+Only the Panda splits are indexed, and deliberately. DREAM keeps the KUKA frames next to their
+images with the camera settings alongside, so the loader reads that tree directly; point
+`--val-dir` at the downloaded `kuka_synth_test_dr` and nothing else is needed. Indexing it
+anyway would change what the KUKA model is fed: without `meta.K` the loader hands the network an
+identity K, which is what the released KUKA weights were trained and measured under, while the
+solver reconstructs the true intrinsics separately from `_camera_settings.json`.
 """
 from __future__ import annotations
 
@@ -24,8 +31,9 @@ import sys
 
 # DREAM's own directory names, and where the index should land.
 REAL_SPLITS = ["panda-3cam_azure", "panda-3cam_kinect360", "panda-3cam_realsense", "panda-orb"]
+# Panda only. The KUKA splits are used exactly as downloaded -- see the note below.
 SYN_SPLITS = ["panda_synth_test_dr", "panda_synth_test_photo",
-              "kuka_synth_test_dr", "kuka_synth_test_photo"]
+              "panda_synth_train_dr"]   # the train split is needed only to retrain
 
 
 def find_camera_settings(start: str, stop_after: int = 4) -> str | None:

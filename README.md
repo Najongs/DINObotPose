@@ -66,6 +66,10 @@ python scripts/doctor.py --val-dir /path/to/Converted_dataset/DREAM_real/panda-3
 relative path to the RGB file. No pixels are copied. `doctor.py --val-dir` then resolves one
 image end to end, which is the cheap way to catch a broken layout before a multi-hour job.
 
+Only the Panda splits are indexed. DREAM keeps the KUKA frames beside their images, so the loader
+reads that tree directly: point `--val-dir` at the downloaded `kuka_synth_test_dr` itself. The
+script's header explains why indexing it anyway would change what the KUKA model is fed.
+
 ## Run
 
 ```bash
@@ -86,6 +90,20 @@ bash scripts/reproduce_paper.sh /path/to/Converted_dataset
 
 Roughly 6 to 9 hours on one RTX A6000; results accumulate in `results/summary.tsv` as each split
 finishes, so the run can be interrupted and resumed.
+
+## Retrain
+
+```bash
+python scripts/train.py --robot panda --data-root /path/to/Converted_dataset --stage all
+python scripts/train.py --robot panda --data-root ... --stage all --dry-run   # print, run nothing
+```
+
+Six stages run in dependency order: the full-frame detector and its heads, then the crop-stage
+detector, its two continue-training passes under viewpoint and occlusion augmentation, and the
+head re-cascade onto the result. `--stage <name>` runs one of them. The wrapper carries each
+stage's checkpoint into the next and fixes the hyperparameters the released weights were made
+with; `train/` holds the three underlying scripts if you want to vary them. Training needs the
+synthetic train split, so pass `prepare_dream.py` a download that includes it.
 
 ## Licensing and attribution
 
