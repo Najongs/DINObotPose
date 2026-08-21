@@ -85,7 +85,7 @@ flipping a knob. `configs/deployed.yaml` records that configuration, including w
 To reproduce the paper's tables end to end:
 
 ```bash
-bash scripts/reproduce_paper.sh /path/to/Converted_dataset
+bash scripts/reproduce_paper.sh /path/to/Converted_dataset /path/to/DREAM/data/synthetic
 ```
 
 Roughly 6 to 9 hours on one RTX A6000; results accumulate in `results/summary.tsv` as each split

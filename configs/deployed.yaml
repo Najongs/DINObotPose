@@ -1,11 +1,13 @@
 # The deployed configuration. Every number reported in the paper uses exactly these settings,
 # identically for every camera and every robot.
 #
-# What the fit does NOT use, and why (all measured on the full test sets):
-#   confidence gate        removed: clean -0.02, 40% occlusion -0.04 (a minimum-keypoint floor
-#                          overrode it, so it could never drop more than one of seven keypoints)
-#   covariance weighting   removed: -0.3 on the four-camera mean, sign varied by camera
-#   divergence guard       removed: fired once in 4,000 frames, -0.02
+# What the fit does NOT use, and why. Each removal is the measured cost of keeping it, so a
+# negative number means the component was hurting; the subset each was measured on is named.
+#   confidence gate        removed: -0.02 clean (1,000 RealSense frames), -0.04 at 40% occlusion
+#                          (300 photorealistic frames). A minimum-keypoint floor overrode it, so
+#                          it could never drop more than one of seven keypoints.
+#   covariance weighting   removed: -0.3 on the four-camera mean, full test sets, sign varied by camera
+#   divergence guard       removed: -0.02; fired once in 4,000 frames (1,000 per real split)
 #   render-and-compare     removed: +-0.0 once the detector was augmentation-trained
 pipeline:
   input_size: 512

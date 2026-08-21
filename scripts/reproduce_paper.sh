@@ -11,7 +11,8 @@
 set -uo pipefail
 
 DATA="${1:?usage: reproduce_paper.sh <Converted_dataset root> [kuka root]}"
-# KUKA ships as its own tree in the DREAM release; point at it if it is not under DATA.
+# The KUKA splits are read straight from the DREAM download rather than from the index
+# (scripts/prepare_dream.py explains why), so this is DREAM's own synthetic/ directory.
 KUKA="${2:-$DATA}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PY="${PYTHON:-python}"
