@@ -48,10 +48,17 @@ only unambiguous way to pin a card on a multi-GPU host.
 ## Get the data
 
 The evaluation runs on the [DREAM](https://github.com/NVlabs/DREAM) benchmark, which we cannot
-redistribute. Download the Panda real and synthetic splits from NVIDIA, then arrange them so that
-each split directory holds the per-frame annotation json files and each json's `meta.image_path`
-resolves to the corresponding RGB image. `doctor.py --val-dir <split>` verifies exactly this and
-reports the resolved image path, so run it before a long job.
+redistribute. Download it with DREAM's own `data/DOWNLOAD.sh`, then build the evaluation index:
+
+```bash
+python scripts/prepare_dream.py --dream-root /path/to/DREAM/data --out /path/to/Converted_dataset
+python scripts/doctor.py --val-dir /path/to/Converted_dataset/DREAM_real/panda-3cam_realsense
+```
+
+`prepare_dream.py` copies each frame's `objects` and `sim_state` through unchanged and adds a
+`meta` block holding the 3x3 intrinsics (read from the split's `_camera_settings.json`) and a
+relative path to the RGB file. No pixels are copied. `doctor.py --val-dir` then resolves one
+image end to end, which is the cheap way to catch a broken layout before a multi-hour job.
 
 ## Run
 
