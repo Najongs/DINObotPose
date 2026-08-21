@@ -144,7 +144,26 @@ def check_dataset(val_dir: str | None) -> None:
         meta = json.load(fh).get("meta", {})
     rel = meta.get("image_path")
     if not rel:
-        report(WARN, "image_path", f"absent from {os.path.basename(sample)}")
+        # No index, which is how the KUKA splits are meant to be read: the image then sits next
+        # to its annotation, and _camera_settings.json must still be reachable, since nothing
+        # has factored the intrinsics into the frames.
+        beside = sample.replace(".json", ".rgb.jpg")
+        if not os.path.isfile(beside):
+            report(BAD, "images", f"{os.path.basename(sample)} has neither meta.image_path nor an "
+                                  "image beside it — run scripts/prepare_dream.py")
+            return
+        report(OK, "images", f"read in place e.g. {beside}")
+        probe = os.path.abspath(val_dir)
+        for _ in range(4):
+            if os.path.isfile(os.path.join(probe, "_camera_settings.json")):
+                report(OK, "intrinsics", f"_camera_settings.json at {probe}")
+                return
+            parent = os.path.dirname(probe)
+            if parent == probe:
+                break
+            probe = parent
+        report(BAD, "intrinsics", "no _camera_settings.json above the frames; an unindexed split "
+                                  "has no other source of metric intrinsics")
         return
     resolved = os.path.normpath(os.path.join(val_dir, rel.replace("../dataset/", "../../../")))
     if os.path.isfile(resolved):
