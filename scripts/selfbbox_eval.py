@@ -136,6 +136,10 @@ def main():
                     help='P1b: crop-angle feature source. dino_frozen (default) = frozen DINOv3 pooled tokens. '
                          'resnet50 = separate trainable ResNet50 trunk; loads the sibling *_angle_feat.pth next to --crop-angle.')
     ap.add_argument('--rot-head', default=None, help='crop-native rot-head (R_init)')
+    ap.add_argument('--single-pass', action='store_true',
+                    help='report the full-frame (first-pass) fit and ignore the crop pass. '
+                         'Requires --bbox-from-solved. This is the single-pass row of the '
+                         'two-pass table: same weights, same solver, one less pass.')
     ap.add_argument('--head-direct', action='store_true',
                     help='ATTRIBUTION ARM (reference-style feed-forward): skip the kinematic solver; '
                          'pose = rot-head (R,t) applied to FK(theta_head). Requires a rot head that '
@@ -310,11 +314,13 @@ def main():
                 # solve_batch optimizes via internal autograd (loss.backward) -> must run with grad
                 # enabled even though we're inside the no_grad eval block.
                 with torch.enable_grad():
-                    _, kp_cam1, reproj1 = solve_batch(o1['keypoints_2d'], o1['confidence'], K, fix_joint7=True,
+                    theta1, kp_cam1, reproj1 = solve_batch(o1['keypoints_2d'], o1['confidence'], K, fix_joint7=True,
                                                       iters=args.iters, lr=2e-2, img_size=IS, device=device,
                                                       prior_w=0.0, theta_init=o1['joint_angles'],
                                                       conf_gate=args.conf_gate, R_init=R1)
                 kp_cam1 = kp_cam1.detach(); reproj1 = reproj1.detach()
+                # Kept so --single-pass can report the full-frame fit without a second pass.
+                _p1 = (theta1.detach(), kp_cam1, reproj1, o1['joint_angles'])
                 uv = project_points(kp_cam1, K)                      # (B,7,2) all points, no conf drop
                 if args.bbox_union:
                     # UNION: solved 7pts (always in, fills occluded base) + confidently-detected kp
@@ -445,7 +451,11 @@ def main():
                                    device=device, dtype=init_ang.dtype)
                 for _j in (4, 5):
                     init_ang[_wristoff, _j] = _mn[_j]
-        if args.head_direct:
+        if args.single_pass:
+            # The crop pass still ran above; its result is simply not used. Costs a forward
+            # pass, and keeps this branch a two-line override instead of a restructured loop.
+            refined, kp_cam, reproj2, init_ang = _p1
+        elif args.head_direct:
             # reference-style arm: FK(theta_head) posed by the rot head's (R,t); no solve.
             from solve import panda_forward_kinematics
             assert 'trans' in o2, '--head-direct requires a rot head trained with translation'
