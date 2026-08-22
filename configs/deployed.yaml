@@ -22,7 +22,10 @@ pipeline:
   box: union                # solved skeleton projected back, united with confident detections
   decode: dark              # sub-pixel heatmap decoding
 fit:
-  iterations: 200
+  # Panda runs 200; the KUKA evaluator has historically defaulted to 250, and the released KUKA
+  # numbers were measured there. Whether the two can be unified at 200 is being re-measured; until
+  # that lands, this is the honest statement rather than a single figure.
+  iterations: {panda: 200, kuka: 250}
   optimizer: adam
   learning_rate: 0.02
   robust_kernel: geman_mcclure   # IRLS weight, knee 8 px, enabled after a 30-iteration warm-up
