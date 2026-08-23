@@ -22,10 +22,11 @@ pipeline:
   box: union                # solved skeleton projected back, united with confident detections
   decode: dark              # sub-pixel heatmap decoding
 fit:
-  # Panda runs 200; the KUKA evaluator has historically defaulted to 250, and the released KUKA
-  # numbers were measured there. Whether the two can be unified at 200 is being re-measured; until
-  # that lands, this is the honest statement rather than a single figure.
-  iterations: {panda: 200, kuka: 250}
+  # Unified for both robots. The KUKA evaluator historically defaulted to 250; re-measuring its
+  # full test sets at 200 costs 0.1 on DR (80.6 to 80.5) and 0.2 on Photo (79.0 to 78.8), both
+  # still ahead of every compared method, so the budget is one number and the one-configuration
+  # claim is literally true. eval.py passes it explicitly so the old defaults cannot resurface.
+  iterations: 200
   optimizer: adam
   learning_rate: 0.02
   robust_kernel: geman_mcclure   # IRLS weight, knee 8 px, enabled after a 30-iteration warm-up
