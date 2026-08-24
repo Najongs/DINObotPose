@@ -83,7 +83,7 @@ def main() -> int:
     # The deployed configuration, fixed. See configs/deployed.yaml for what is absent and why.
     # --iters is stated explicitly because the two underlying evaluators historically defaulted
     # differently (200 against 250); the deployed budget is 200 for both robots.
-    cmd += ["--bbox-from-solved", "--bbox-union", "--conf-gate", "0.0", "--iters", "200",
+    cmd += ["--bbox-from-solved", "--conf-gate", "0.0", "--iters", "200",
             "--val-dir", args.val_dir,
             "--max-frames", str(args.max_frames),
             "--batch-size", str(args.batch_size)]

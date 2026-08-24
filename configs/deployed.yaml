@@ -16,10 +16,14 @@
 #                          all, and the second robot the wrong way is not worth the reader's
 #                          attention.
 #   render-and-compare     removed: +-0.0 once the detector was augmentation-trained
+#   detection-box union    removed. Uniting the skeleton box with the confident-detection box
+#                          buys at most +0.1 on the Panda real mean and +0.3 at heavy occlusion,
+#                          and costs 1.3-1.5 on both KUKA splits, whose look-alike links yield
+#                          spurious confident detections that inflate the box.
 pipeline:
   input_size: 512
   passes: 2                 # full frame, then a crop the first pass derives for itself
-  box: union                # solved skeleton projected back, united with confident detections
+  box: solved_skeleton      # the projected first-pass skeleton's bounding box, squared and padded
   decode: dark              # sub-pixel heatmap decoding
 fit:
   # Unified for both robots. The KUKA evaluator historically defaulted to 250; re-measuring its
