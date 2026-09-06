@@ -167,6 +167,8 @@ def main():
                          '(theta frozen). Measures the cost of joint-angle prediction vs a known-joint upper bound.')
     ap.add_argument('--oracle-except', default='', help='with --oracle-angle: comma-separated joint indices (0=J1..5=J6) to KEEP the PREDICTED value instead of GT. e.g. "4" = oracle all joints but predict J5 (achievable-ceiling: J5 is a write-off observability dead-end).')
     ap.add_argument('--oracle-angle-noise-mae', type=float, default=0.0, help='with --oracle-angle: inject controlled Gaussian noise on GT theta, per-batch renormalized so the realized wrapped-abs MAE (deg) equals this target. Builds the freeze-6DOF ADD-AUC vs angle-MAE curve. 0 = pure oracle.')
+    ap.add_argument('--focal-error', type=float, default=0.0, help='DIAGNOSTIC (opt-in, default off = bit-identical): relative error injected into the intrinsics HANDED TO THE PIPELINE, fx,fy *= (1+e), while the ground truth stays exact. Measures how much a miscalibrated focal length costs a purely geometric solve. e.g. 0.02 = a two-percent focal error.')
+    ap.add_argument('--principal-error', type=float, default=0.0, help='DIAGNOSTIC (opt-in): pixel shift injected into the principal point handed to the pipeline, cx,cy += this (in 512-space).')
     ap.add_argument('--oracle-noise-seed', type=int, default=0, help='seed for --oracle-angle-noise-mae (average curve over a few seeds).')
     ap.add_argument('--margin', type=float, default=1.5)
     ap.add_argument('--bbox-conf', type=float, default=0.1, help='conf threshold for bbox keypoints')
@@ -298,6 +300,13 @@ def main():
         gt = batch['angles'].to(device)[:, :6]
         gt3d = batch['keypoints_3d'].to(device)
         K = scale_K(batch['camera_K'], batch['original_size'], IS).to(device)
+        if args.focal_error != 0.0 or args.principal_error != 0.0:
+            # DIAGNOSTIC: hand the pipeline a miscalibrated K. gt3d is untouched, so the reported
+            # error is exactly what the miscalibration costs. Applied once, before both passes,
+            # so the crop math and both solves see the same wrong intrinsics a user would supply.
+            K = K.clone()
+            K[:, 0, 0] *= (1.0 + args.focal_error); K[:, 1, 1] *= (1.0 + args.focal_error)
+            K[:, 0, 2] += args.principal_error;     K[:, 1, 2] += args.principal_error
         bidx = torch.arange(img.shape[0], device=device).view(-1, 1).float()
         with torch.no_grad():
             # PASS 1: full-frame detector -> bbox  (or GT keypoints if --oracle-bbox)

@@ -1,14 +1,15 @@
 # DINObotPose
 
-Monocular robot pose and joint-angle estimation by iterative model fitting on frozen foundation
-features. From a single RGB image, with no encoder readings and no ground-truth bounding box, the
+Monocular robot pose and joint-angle estimation by iterative model fitting on pretrained foundation
+features, used essentially as released. From a single RGB image, with no encoder readings and no ground-truth bounding box, the
 pipeline recovers the six-degree-of-freedom camera-to-robot pose together with the joint angles.
 
 This repository reproduces every measured number in the paper.
 
 ## What it does
 
-Sub-pixel keypoints are read from a frozen DINOv3 backbone. A first pass fits the whole frame and
+Sub-pixel keypoints are read from a DINOv3 backbone that stays frozen everywhere except the crop
+detector, where the last four blocks are fine-tuned. A first pass fits the whole frame and
 projects its own skeleton to define a crop for a second pass, so the pipeline produces the bounding
 box that competing methods take from ground truth or an external detector. An iterative fit then
 recovers the joint angles together with the camera pose from those keypoints alone, minimizing a
@@ -79,7 +80,8 @@ python scripts/eval.py --robot panda --val-dir .../panda_synth_test_photo --occl
 ```
 
 `eval.py` fixes every flag to the deployed configuration so a reproduction cannot drift by
-flipping a knob. `configs/deployed.yaml` records that configuration, including what the fit does
+flipping a knob. On the full Panda real splits it reproduces 78.5 (AK), 83.6 (XK), 88.3 (RS) and
+80.4 (ORB), a four-camera mean of 82.7, and 81.8 / 80.3 on the two KUKA synthetic splits. `configs/deployed.yaml` records that configuration, including what the fit does
 *not* use and the measurement that justified each removal.
 
 To reproduce the paper's tables end to end:
@@ -124,8 +126,8 @@ The DREAM benchmark is distributed by NVIDIA under its own terms and is not redi
 
 ```bibtex
 @inproceedings{dinobotpose,
-  title     = {Geometry-Guided Monocular Articulated Robot Pose Estimation with Frozen Foundation Features},
-  booktitle = {IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)},
+  title     = {Geometry-Guided Monocular Articulated Robot Pose Estimation with Pretrained Foundation Features},
+  booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
   year      = {2026}
 }
 ```

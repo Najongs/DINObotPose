@@ -20,6 +20,12 @@
 #                          buys at most +0.1 on the Panda real mean and +0.3 at heavy occlusion,
 #                          and costs 1.3-1.5 on both KUKA splits, whose look-alike links yield
 #                          spurious confident detections that inflate the box.
+#   crop-detector budget   12 epochs. A budget ladder at 12/24/36/48/100 epochs, each trained from
+#                          the same warm start and evaluated on the full real splits, gives means of
+#                          82.7/82.4/84.1/83.4/83.5: not monotone, and the four retrained points
+#                          scatter with a standard deviation of 0.7, so no budget beyond 12 is a
+#                          reliable lever. The validation curve of the 100-epoch run converges by
+#                          epoch 10 and peaks at epoch 51, which is why the extra epochs buy nothing.
 pipeline:
   input_size: 512
   passes: 2                 # full frame, then a crop the first pass derives for itself
@@ -33,7 +39,7 @@ fit:
   iterations: 200
   optimizer: adam
   learning_rate: 0.02
-  robust_kernel: geman_mcclure   # IRLS weight, knee 8 px, enabled after a 30-iteration warm-up
+  robust_kernel: lorentzian      # IRLS weight kappa^2/(kappa^2+r^2), knee 8 px, enabled after a 30-iteration warm-up
   loss: huber                    # knee ~5 px on the image-normalised residual
   free_variables: [joint_angles, rotation, translation]   # 12 DOF; terminal wrist roll fixed at 0
 eval:

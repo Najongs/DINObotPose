@@ -130,6 +130,7 @@ def main():
     ap.add_argument('--oracle-bbox', action='store_true', help='box from GT keypoints (crop-math sanity)')
     ap.add_argument('--oracle-angle', action='store_true', help='known-joint ceiling: inject GT theta, freeze it, solve only R,t (mirrors selfbbox_eval --oracle-angle)')
     ap.add_argument('--freeze-head-theta', action='store_true', help='P0 DECOUPLE (RoboPEPP-style): freeze theta at the HEAD prediction (no GT) and solve ONLY camera R,t (mirrors selfbbox_eval --freeze-head-theta)')
+    ap.add_argument('--occlude-ratio', type=float, default=0.0, help='DIAGNOSTIC (opt-in, default off = bit-identical): paste distractor occluders covering this fraction of the robot, using the same generator and per-frame seeding as the Panda occlusion protocol, so the two robots\' curves are directly comparable.')
     ap.add_argument('--cov-pnp', action='store_true')
     args = ap.parse_args()
 
@@ -158,6 +159,10 @@ def main():
     n_fb = 0
     for batch in tqdm(loader, desc='kuka-autobbox'):
         img = batch['image'].to(device)
+        if args.occlude_ratio > 0:
+            from occl_util import paste_occluders_batch_
+            paste_occluders_batch_(img, batch['keypoints'].numpy(), batch['valid_mask'].numpy(),
+                                   args.occlude_ratio, batch['name'])
         gt = batch['angles'].to(device)[:, :6]
         gt3d = batch['keypoints_3d'].to(device)
         ow = float(batch['original_size'][0][0]); oh = float(batch['original_size'][0][1])

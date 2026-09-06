@@ -326,6 +326,8 @@ def main(args):
             save_model = model.module if hasattr(model, 'module') else model
             if current_auc > best_val_auc: best_val_auc = current_auc; torch.save(save_model.state_dict(), output_dir / 'best_heatmap.pth')
             torch.save(save_model.state_dict(), output_dir / 'last_heatmap.pth')
+            if getattr(args, 'snap_epochs', 0) and (epoch + 1) % args.snap_epochs == 0:
+                torch.save(save_model.state_dict(), output_dir / f'snap_ep{epoch + 1}.pth')
             if getattr(args, 'auto_resume', False):
                 torch.save({'model': save_model.state_dict(), 'optimizer': optimizer.state_dict(),
                             'scheduler': scheduler.state_dict(), 'epoch': epoch, 'resume_epoch': epoch + 1,
@@ -356,6 +358,7 @@ if __name__ == '__main__':
     parser.add_argument('--unfreeze-blocks', type=int, default=2)
     parser.add_argument('--num-workers', type=int, default=4)
     parser.add_argument('--auto-resume', action='store_true', help='resume model+optimizer+scheduler+epoch from <output-dir>/training_state.pt if present (per-epoch checkpoint; survives GPU kills)')
+    parser.add_argument('--snap-epochs', type=int, default=0, help='also save a frozen snapshot snap_ep{N}.pth every N epochs (budget-ladder from ONE trajectory; 0 = off)')
     parser.add_argument('--ckpt-every', type=int, default=0, help='also save training_state.pt every N optimizer steps (mid-epoch; bounds work lost to a flaky-GPU kill). 0 = per-epoch only')
     parser.add_argument('--no-augment', action='store_true', help='Disable general data augmentation')
     parser.add_argument('--aug-level', type=str, default='light', choices=['light', 'strong', 'strong_vp'], help='Augmentation strength (strong = Stage-1 sim-to-real; strong_vp = strong + wider rotation/perspective/shear for diverse-viewpoint splits)')
