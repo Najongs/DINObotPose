@@ -223,6 +223,8 @@ def main():
     ap.add_argument('--per-frame-out', type=str, default='',
                     help='write per-frame "fid<TAB>ADD(m)<TAB>median_depth(m)" rows to this file '
                          '(for targeted-recovery / do-no-harm analysis).')
+    ap.add_argument('--t-from-head', action='store_true',
+                    help='ablation: initialize the crop-pass translation from the rot head instead of EPnP (default off = deployed)')
     ap.add_argument('--seed', type=int, default=-1,
                     help='opt-in determinism (default -1 = off, deployed behavior). >=0 seeds '
                          'numpy/torch and re-seeds cv2 RANSAC per PnP call so a z-bound ON vs OFF '
@@ -420,6 +422,7 @@ def main():
             globals().setdefault('_EDGE_DROP', [0, 0]); _g = globals()['_EDGE_DROP']
             _g[0] += int(_off.sum()); _g[1] += _off.shape[0]                          # total drops, frames
         R_init = o2.get('rot_matrix') if args.rot_head else None
+        t_init_h = o2.get('trans') if (args.t_from_head and args.rot_head) else None
         cov_inv = None
         if args.cov_pnp and not args.oracle_2d:
             from solve import heatmap_cov_inv
@@ -481,7 +484,7 @@ def main():
                 _ti = init_ang if _s == 0 else init_ang + torch.randn(init_ang.shape, generator=_gen, device=device, dtype=init_ang.dtype) * _sig
                 _th, _kc, _rp = solve_batch(kp2d, conf, Kc, fix_joint7=True, iters=args.iters,
                                             lr=2e-2, img_size=IS, device=device, prior_w=0.0,
-                                            theta_init=_ti, conf_gate=args.conf_gate, R_init=R_init,
+                                            theta_init=_ti, conf_gate=args.conf_gate, R_init=R_init, t_init=t_init_h,
                                             cov_inv=cov_inv, prior_adaptive=args.prior_adaptive,
                                             robust_scale=args.robust_scale, shed_k=args.shed_k,
                                             z_bound=_zb, z_target=args.z_target,
