@@ -4,7 +4,8 @@ Monocular robot pose and joint-angle estimation by iterative model fitting on pr
 features, used essentially as released. From a single RGB image, with no encoder readings and no ground-truth bounding box, the
 pipeline recovers the six-degree-of-freedom camera-to-robot pose together with the joint angles.
 
-This repository reproduces every measured number in the paper.
+This repository reproduces the paper's headline results: the comparison table on every split of
+both robots, the occlusion curve, and the ablation rows that only change a flag.
 
 ## What it does
 
@@ -93,6 +94,16 @@ bash scripts/reproduce_paper.sh /path/to/Converted_dataset /path/to/DREAM/data/s
 Roughly 6 to 9 hours on one RTX A6000; results accumulate in `results/summary.tsv` as each split
 finishes, so the run can be interrupted and resumed.
 
+What that script covers is the main comparison table and the occlusion curve. The rest of the
+paper's tables need one extra step each, and one of them cannot be reproduced from this release:
+
+| Table | How |
+|---|---|
+| Main comparison, occlusion curve | `reproduce_paper.sh` |
+| Single-pass rows of the ablation | `selfbbox_eval.py --single-pass --bbox-from-solved` |
+| Keypoint accuracy, joint-angle error | `selfbbox_eval.py --dump-npz`, then read the dumped `kp2d_full`, `theta` and `gtkp2d` arrays |
+| Backbone comparison | not reproducible here: it needs the SigLIP2 and ViT checkpoints, which are not part of this release |
+
 ## Retrain
 
 ```bash
@@ -126,8 +137,10 @@ The DREAM benchmark is distributed by NVIDIA under its own terms and is not redi
 
 ```bibtex
 @inproceedings{dinobotpose,
-  title     = {Geometry-Guided Monocular Articulated Robot Pose Estimation with Pretrained Foundation Features},
+  title     = {{DINObotPose}: Monocular Robot Pose and Joint Angle Estimation with a Pretrained
+               Vision Foundation Model and Kinematic Fitting},
   booktitle = {IEEE International Conference on Robotics and Automation (ICRA)},
-  year      = {2026}
+  year      = {2027},
+  note      = {Under review}
 }
 ```
