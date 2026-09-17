@@ -248,7 +248,8 @@ def main():
     # ⚠️ 좌표계 주의: kp2d 는 CROP-IS 공간, gtkp2d(=batch['keypoints']) 는 FULL-FRAME IS 공간이라
     # 직접 비교하면 안 된다. kp2d_full 이 crop->full-frame 으로 매핑된 검출 2D (line ~298 과 동일 식).
     _DUMP = {'fid': [], 'theta': [], 'kp_cam': [], 'gt3d': [], 'found': [], 'feat': [], 'reproj': [], 'conf': [], 'gtoff': [],
-             'head_theta': [], 'kp2d': [], 'gtkp2d': [], 'kp2d_full': [], 'boxes': []} if args.dump_npz else None
+             'head_theta': [], 'kp2d': [], 'gtkp2d': [], 'kp2d_full': [], 'boxes': [],
+             'kp2d_argmax': []} if args.dump_npz else None   # kp2d_argmax: ADDITIVE (2026-09-15), crop-pass argmax decode
 
     device = torch.device('cuda'); assert torch.cuda.is_available()
     IS = args.image_size
@@ -538,7 +539,10 @@ def main():
                 _bx = boxes.detach().cpu().numpy()
             else:
                 _k2f = _k2; _bx = np.zeros((_k2.shape[0], 4), dtype=np.float32)
+            _hm2 = o2['heatmaps_2d']; _ai = _hm2.flatten(2).argmax(dim=-1); _W2 = _hm2.shape[-1]
+            _k2a = torch.stack([_ai % _W2, _ai // _W2], dim=-1).float().cpu().numpy()   # (B,7,2) crop-IS argmax
             for b in range(img.shape[0]):
+                _DUMP['kp2d_argmax'].append(_k2a[b])
                 _DUMP['fid'].append(names[b]); _DUMP['theta'].append(th[b]); _DUMP['kp_cam'].append(kc[b])
                 _DUMP['gt3d'].append(g3[b]); _DUMP['found'].append(fv[b])
                 _DUMP['feat'].append(ft[b]); _DUMP['reproj'].append(float(rp[b]))
@@ -561,7 +565,7 @@ def main():
                   conf=_np.array(_DUMP['conf']), gtoff=_np.array(_DUMP['gtoff']),
                   head_theta=_np.array(_DUMP['head_theta']), kp2d=_np.array(_DUMP['kp2d']),
                   gtkp2d=_np.array(_DUMP['gtkp2d']), kp2d_full=_np.array(_DUMP['kp2d_full']),
-                  boxes=_np.array(_DUMP['boxes']))
+                  boxes=_np.array(_DUMP['boxes']), kp2d_argmax=_np.array(_DUMP['kp2d_argmax']))
         print(f"[dump] {len(_DUMP['fid'])} frames -> {args.dump_npz}", flush=True)
     raw = (raw_err / n).numpy(); ref = (ref_err / n).numpy(); adds = np.array(adds)
     print(f"\n{'='*54}\n  SELF-BBOX CROP  ({n} frames)  {os.path.basename(args.val_dir)}\n{'='*54}")
